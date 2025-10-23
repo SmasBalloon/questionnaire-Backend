@@ -1,0 +1,203 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Modèle utilisateur
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(PLAYER)
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  createdQuizzes     Quiz[]
+  participations     Participation[]
+  playerAnswers      PlayerAnswer[]
+
+  @@map("users")
+}
+
+// Rôles des utilisateurs
+enum UserRole {
+  ADMIN
+  CREATOR
+  PLAYER
+}
+
+// Modèle Quiz/Questionnaire
+model Quiz {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?  @db.Text
+  coverImage  String?
+  isPublic    Boolean  @default(true)
+  timeLimit   Int?     // Temps limite global en secondes (optionnel)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  creatorId Int
+  creator   User     @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+  questions Question[]
+  sessions  GameSession[]
+
+  @@map("quizzes")
+  @@index([creatorId])
+}
+
+// Modèle Question
+model Question {
+  id           Int          @id @default(autoincrement())
+  quizId       Int
+  questionText String       @db.Text
+  imageUrl     String?      // URL facultative de l'image associée à la question
+  type         QuestionType @default(MULTIPLE_CHOICE)
+  points       Int          @default(1000)
+  timeLimit    Int          @default(30) // Temps limite en secondes
+  order        Int          // Ordre de la question dans le quiz
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  // Pour les questions TRUE_FALSE on stocke la bonne valeur ici (true = Vrai, false = Faux)
+  correctAnswer Boolean?
+  // Pour les questions SHORT_ANSWER on stocke la réponse correcte attendue ici
+  correctAnswerText String?  @db.Text
+
+  // Relations
+  quiz    Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  answers Answer[]
+  playerAnswers PlayerAnswer[]
+
+  @@map("questions")
+  @@index([quizId])
+}
+
+// Types de questions
+enum QuestionType {
+  MULTIPLE_CHOICE  // QCM (une seule réponse)
+  MULTIPLE_SELECT  // Plusieurs réponses possibles
+  TRUE_FALSE       // Vrai ou Faux
+  SHORT_ANSWER     // Réponse courte
+}
+
+// Modèle Réponse (options de réponse pour une question)
+model Answer {
+  id         Int      @id @default(autoincrement())
+  questionId Int
+  answerText String?   @db.Text
+  isCorrect  Boolean  @default(false)
+  order      Int?     // Ordre d'affichage de la réponse
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  question      Question       @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  playerAnswers PlayerAnswer[]
+
+  @@map("answers")
+  @@index([questionId])
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Modèle Session de jeu (partie en direct)
+model GameSession {
+  id           Int             @id @default(autoincrement())
+  quizId       Int
+  code         String          @unique // Code PIN pour rejoindre
+  status       SessionStatus   @default(WAITING)
+  startedAt    DateTime?
+  endedAt      DateTime?
+  currentQuestion Int?         // Index de la question actuelle
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  // Relations
+  quiz           Quiz            @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  participations Participation[]
+
+  @@map("game_sessions")
+  @@index([quizId])
+  @@index([code])
+}
+
+// Statuts de session
+enum SessionStatus {
+  WAITING     // En attente de joueurs
+  PLAYING     // En cours
+  FINISHED    // Terminée
+  CANCELLED   // Annulée
+}
+
+// Modèle Participation (joueur dans une session)
+model Participation {
+  id            Int      @id @default(autoincrement())
+  gameSessionId Int
+  userId        Int
+  nickname      String?  // Pseudo pour la session
+  score         Int      @default(0)
+  rank          Int?     // Classement final
+  joinedAt      DateTime @default(now())
+  leftAt        DateTime?
+
+  // Relations
+  gameSession   GameSession    @relation(fields: [gameSessionId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  playerAnswers PlayerAnswer[]
+
+  @@unique([gameSessionId, userId])
+  @@map("participations")
+  @@index([gameSessionId])
+  @@index([userId])
+}
+
+// Modèle Réponse du joueur
+model PlayerAnswer {
+  id              Int       @id @default(autoincrement())
+  participationId Int
+  questionId      Int
+  answerId        Int?      // Null si réponse courte
+  answerText      String?   // Pour les réponses courtes
+  isCorrect       Boolean   @default(false)
+  pointsEarned    Int       @default(0)
+  timeToAnswer    Int?      // Temps pris pour répondre en secondes
+  answeredAt      DateTime  @default(now())
+
+  // Relations
+  participation Participation @relation(fields: [participationId], references: [id], onDelete: Cascade)
+  question      Question      @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answer        Answer?       @relation(fields: [answerId], references: [id], onDelete: SetNull)
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        Int
+
+  @@map("player_answers")
+  @@index([participationId])
+  @@index([questionId])
+  @@index([userId])
+}
+
