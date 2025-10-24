@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { enregistrerUneReponseTrueFalse, GetQuestionTrueFalseInfo, UpdateReponseTrueFalse, GetAnswersByQuestionId, SaveMultipleAnswers } from '../controllers/answer.controller'
-import isLogin from "../middlewares/islogin.middlewares"
+import { enregistrerUneReponseTrueFalse, GetQuestionTrueFalseInfo, UpdateReponseTrueFalse, GetAnswersByQuestionId, SaveMultipleAnswers } from '../controllers/answer.controller.js'
+import isLogin from "../middlewares/islogin.middlewares.js"
 const router = Router();
 
 router.post('/enregistrer', isLogin, enregistrerUneReponseTrueFalse)

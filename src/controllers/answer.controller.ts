@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
-import { GetAnswerCountByQuestionId, enregistrerUneReponseTrueFalseServices, GetQuestionTrueFalseInfoService, UpdateReponseTrueFalseService, GetAnswersByQuestionIdService, SaveMultipleAnswersService } from '../services/answer.service'
-import type { AuthRequest } from '../middlewares/islogin.middlewares'
+import { GetAnswerCountByQuestionId, enregistrerUneReponseTrueFalseServices, GetQuestionTrueFalseInfoService, UpdateReponseTrueFalseService, GetAnswersByQuestionIdService, SaveMultipleAnswersService } from '../services/answer.service.js'
+import type { AuthRequest } from '../middlewares/islogin.middlewares.js'
 
 export const enregistrerUneReponseTrueFalse = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {

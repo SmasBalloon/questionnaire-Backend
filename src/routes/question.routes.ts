@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { DeleteQuestion, CreateQuestion, GetQuestionByQuizId, GetOneQuestionById, ModifTitleQuestion, ModifTempsEtPointsQuestion, ModifShortAnswer } from '../controllers/question.controller'
-import isLogin from "../middlewares/islogin.middlewares"
+import { DeleteQuestion, CreateQuestion, GetQuestionByQuizId, GetOneQuestionById, ModifTitleQuestion, ModifTempsEtPointsQuestion, ModifShortAnswer } from '../controllers/question.controller.js'
+import isLogin from "../middlewares/islogin.middlewares.js"
 const router = Router();
 
 router.post("/create", isLogin, CreateQuestion)

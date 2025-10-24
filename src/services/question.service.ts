@@ -1,5 +1,5 @@
 import { $Enums } from "@prisma/client";
-import prisma from "../utils/prisma";
+import prisma from "../utils/prisma.js";
 enum QuestionType {
   MULTIPLE_CHOICE = "MULTIPLE_CHOICE",
   MULTIPLE_SELECT = "MULTIPLE_SELECT",

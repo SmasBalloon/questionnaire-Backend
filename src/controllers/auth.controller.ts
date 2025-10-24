@@ -1,12 +1,12 @@
 
 import type { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
-import { 
+import {
   registerUser,
   findPasswordByEmail,
   findUniqueUSerbyEmail,
   generateToken
- } from "../services/auth.service";
+} from "../services/auth.service.js";
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -24,7 +24,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     // Logic for user registration with hashedPassword
     await registerUser(email, hashedPassword, name);
     res.status(200).json({ message: "Registration successful" });
-    
+
   } catch (error) {
     res.status(401).json({ message: "Invalid credentials" });
     next(error);
@@ -46,7 +46,7 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       const token = await generateToken(email)
       res.status(200).json({ token })
     }
-   
+
   } catch (error) {
     res.status(401).json({ message: "Invalid credentials" });
     next(error);
