@@ -26,7 +26,8 @@ export const getQuizById = async (id: number) => {
 
     return res
   } catch (e) {
-    console.error(e)
+    console.error('Erreur lors de la récupération des quiz:', e)
+    throw e
   }
 }
 
